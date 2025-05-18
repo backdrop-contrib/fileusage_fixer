@@ -1,0 +1,114 @@
+<?php
+/**
+ * @file
+ * Main code for File Usage Fixer module.
+ */
+
+/**
+ * Just to make sure, we never run into problems with max_allowed_packet.
+ */
+define('FIX_MAX_PER_QUERY', 5000);
+
+/**
+ * Implements hook_menu().
+ */
+function fileusage_fixer_menu() {
+  $items = array();
+  $items['admin/content/fix-file-usage'] = array(
+    'title' => 'Fix file usage',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('fileusage_fixer_form'),
+    'access arguments' => array('manage files'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+
+  return $items;
+}
+
+/**
+ * Form callback.
+ */
+function fileusage_fixer_form($form, &$form_state) {
+
+  $subquery = db_select('file_usage', 'fu')->fields('fu', array('fid'));
+  $query = db_select('file_managed', 'fm')
+    ->fields('fm', array('fid'))
+    ->condition('status', 1)
+    ->condition('fid', $subquery, 'NOT IN');
+  $candidates = $query->execute()->fetchAllAssoc('fid');
+  $count = count($candidates);
+
+  $form['intro'] = array(
+    '#type' => 'markup',
+    '#markup' => '<strong>' . t('!num problematic files found.', array('!num' => $count)) . '</strong>',
+  );
+  if (!$count) {
+    $text = t('You can uninstall the File Usage Fixer module.');
+  }
+  else {
+    $text = t('Submitting this form will add file usage to !num problematic files. After that they can safely get referenced without risk of losing them by automatic file garbage collection.', array(
+      '!num' => min($count, FIX_MAX_PER_QUERY),
+    ));
+  }
+  $form['info'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p>' . $text . '</p>',
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Fix file usage'),
+    '#disabled' => !$count,
+  );
+
+  return $form;
+}
+
+/**
+ * Submission callback for fileusage_fixer_form.
+ */
+function fileusage_fixer_form_submit($form, &$form_state) {
+  // Actually the same query as in the form. Run it again, as in rare cases
+  // something might have changed in the meantime.
+  $subquery = db_select('file_usage', 'fu')->fields('fu', array('fid'));
+  $query = db_select('file_managed', 'fm')
+    ->fields('fm', array('fid'))
+    ->condition('status', 1)
+    ->condition('fid', $subquery, 'NOT IN');
+  $candidates = $query->execute()->fetchAllAssoc('fid');
+  $count = count($candidates);
+
+  // Just in case.
+  if (!$count) {
+    return;
+  }
+
+  if ($count > FIX_MAX_PER_QUERY) {
+    $candidates = array_slice($candidates, 0, FIX_MAX_PER_QUERY);
+  }
+
+  // Prepare and run the insert query.
+  $values = array();
+  foreach ($candidates as $fid => $data) {
+    $values[] = array(
+      'fid' => $fid,
+      'module' => 'file',
+      'type' => 'file',
+      'id' => $fid,
+      'count' => 1,
+    );
+  }
+  $query = db_insert('file_usage')->fields(array(
+    'fid',
+    'module',
+    'type',
+    'id',
+    'count',
+  ));
+  foreach ($values as $record) {
+    $query->values($record);
+  }
+  $query->execute();
+  backdrop_set_message(t('Updated !count file usage records.', array('!count' => $count)));
+}
