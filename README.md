@@ -22,16 +22,15 @@ You'll find files with state "permanent", but without usage count.
 
 **What can you do about it?**
 
-Install this utility module, go to TBD..., and submit the form. Depending on the
-amount of affected files (more than X000?), you might need to do that multiple times.
+Install this utility module, go to admin/content/fix-file-usage, and submit the form.
+Depending on the amount of affected files (more than 5000?), you might have
+to repeat that step multiple times.
 
 When you're done, you can safely uninstall this module again.
 
-You can now safely reference any of the available files.
+You can now reference any of the available files.
 
-Or you can wait until either or both of the related core issues got
-resolved. todo - insert links
-
+Related core issue: https://github.com/backdrop/backdrop-issues/issues/3857
 
 ## Installation
 
@@ -45,7 +44,7 @@ Bugs and feature requests should be reported in the
 
 ## Current Maintainers
 
-- Indigoxela (https://github.com/indigoxela)
+- [Indigoxela](https://github.com/indigoxela)
 
 ## License
 
