@@ -20,11 +20,6 @@ error "The file used in the XXX field may not be referenced.".
 To verify, go to admin/content/files and sort by "Use count" (ascending).
 You'll find files with state "permanent", but without usage count.
 
-Files without usage count and in state temporary will automatically get deleted
-on cron runs (after a grace time of 6 hours) - that's normal behavior.
-Files without usage count, but in state "permanent" will not get deleted,
-but they're not actually usable, either.
-
 **What can you do about it?**
 
 Install this utility module, go to TBD..., and submit the form. Depending on the
