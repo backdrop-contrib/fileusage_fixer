@@ -8,14 +8,14 @@ Utility module to fix the odd situation that managed files have a status of
 There are multiple reasons for that, the most common is upgrading from
 Drupal 7, which didn't handle files the way Backdrop CMS does (managed, with
 usage records).
-Files and images only used *inline*, for example inserted into a WYSIWYG
-editor, aren't handled yet when upgrading, so these files end up in this
-odd state.
+Usage count of files and images only used *inline*, for example inserted into a
+WYSIWYG editor in D7, aren't handled yet when upgrading, so these files end up
+in this odd state.
 
 **How can you know that your site is affected?**
 
 Trying to use such files in the editor via Image library will end up with a form
-error "The file used in the XXX field may not be referenced.".
+error "The file used in the Upload an image field may not be referenced.".
 
 To verify, go to admin/content/files and sort by "Use count" (ascending).
 You'll find files with state "permanent", but without usage count.
