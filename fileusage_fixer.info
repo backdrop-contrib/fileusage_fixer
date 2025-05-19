@@ -1,4 +1,4 @@
 type = module
 name = File Usage Fixer
-description = Utility module to... @todo
+description = Utility module to add missing file usage records to files, so they can safely get referenced.
 backdrop = 1.x
